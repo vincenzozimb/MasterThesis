@@ -1,7 +1,7 @@
 using ITensors
 using QuadGK
 using Plots
-using Statistics
+using LaTeXStrings
 
 let
 
@@ -81,21 +81,28 @@ let
         s = sinh(2 * k)
         xmin = 0.0
         xmax = π
-        integrand(x) = log(c^2 + √(s^4 + 1 - 2 * s^2 * cos(x)))
+        integrand(x) = log(c^2 + √(s^4 + 1 - 2 * s^2 * cos(2.0*x)))
         integral, err = quadgk(integrand, xmin, xmax)::Tuple{Float64,Float64}
         return -(log(2) + integral / π) / (2 * β)
     end
-
-
-    ## test 
     
+    ## heat capacity
+    function heat_capacity(F, T)
+        delta_T = diff(T)
+        dF_dT = diff(F) ./ delta_T
+        d2F_dT2 = diff(dF_dT) ./ delta_T[1:end-1]    
+        return -T[1:end-2] .* d2F_dT2
+    end
+    
+
+    ## run
     maxdim = 6
     topscale = 12
     
-    Tc = 2.2691853
-    
+    Tc = 2.0 / (log(1.0+sqrt(2.0))) # Tc ≈ 2.2691853
+
     J = 1.0
-    ts = 0.1:0.2:8.1 # this is perfect
+    ts = 0.1:0.2:10.0
     ks = J ./ ts
     
     @show "=====TRG======"
@@ -108,41 +115,40 @@ let
         flush(stdout)
         cnt -= 1
     end
-
+    println()
     F = - ts .* log.(pf)
-
-    pl1 = plot(ts, F, ls=:dot, lw=:3, label="free energy")
-    vline!([Tc], line=:red, label="T_c")   
-    Fexact = ising_free_energy.(J ./ ts)
-    plot!(ts, Fexact, label="free energy exact")
+    
+    pl1 = scatter(ts, F, ms=2, label="TRG")
+    vline!([Tc], line=:red, label=L"T_c")   
+    Fexact = ising_free_energy.(1.0 ./ ts, J)
+    plot!(ts, Fexact, label="Exact")
+    title!("Free energy per site")
+    xlabel!("T")
+    ylabel!("F")
     display(pl1)
     
     ## relative error in free energy
     re = abs.(F - Fexact) ./ abs.(Fexact)
     
-    pl2 = plot(ts, re, label="relative error")
-    vline!([Tc], line=:red, label="T_c")
+    pl2 = scatter(ts, re, ms=2, label="TRG")
+    vline!([Tc], line=:red, label=L"T_c")
+    title!("Free energy relative error")
+    xlabel!("T")
+    ylabel!("ϵ")
     display(pl2)
 
-
-    ## heat capacity
-    function heat_capacity(F, T)
-
-        delta_T = diff(T)
-        dF_dT = diff(F) ./ delta_T
-        d2F_dT2 = diff(dF_dT) ./ delta_T[1:end-1]    
-        # Calculate the heat capacity C = -T * d2F/dT2
-        C = -T[1:end-2] .* d2F_dT2
-        
-        return C
-    end
-
+    # specific heat
     C = heat_capacity(F,ts)
-    Cexact = heat_capacity(Fexact,ts)
-    vline!([Tc], line=:red, label="T_c")
-    pl3 = plot(ts[1:end-2], C, ls=:dot, lw=:3, label="specific heat")
-    plot!(ts[1:end-2], Cexact, label="heat capacity exact")
-    display(pl3)
+    tp = 0.1:0.01:10.0
+    Fexact = ising_free_energy.(1.0 ./ tp, J)
+    Cexact = heat_capacity(Fexact,tp)
 
+    pl3 = scatter(ts[1:end-2], C, ms=2, label="TRG")
+    vline!([Tc], line=:red, label=L"T_c")
+    plot!(tp[1:end-2], Cexact, lw=:2, label="Exact")
+    title!("Specific heat")
+    xlabel!("T")
+    ylabel!("C")
+    display(pl3)
 
 end
