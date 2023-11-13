@@ -22,7 +22,7 @@ let
     Tc = 2.0 / (log(1.0+sqrt(2.0))) # Tc ≈ 2.2691853
 
     J = 1.0
-    h = 0.01
+    h = 0.0
     ts = 0.1:0.2:10.0
     ks = J ./ ts
     # hs = (0.0:0.02:0.1) ./ ts
@@ -59,7 +59,7 @@ let
     ylabel!("ϵ")
     display(pl2)
 
-    # specific heat
+    ## specific heat
     C = heat_capacity(F,ts)
     tp = 0.1:0.01:10.0
     Fexact = ising_free_energy.(1.0 ./ tp, J)
@@ -72,5 +72,18 @@ let
     xlabel!("T")
     ylabel!("C")
     display(pl3)
+
+    ## relative error in the specific heat
+    Fexact = ising_free_energy.(1.0 ./ ts, J)
+    Cexact = heat_capacity(Fexact,ts)
+
+    re = abs.(C - Cexact) ./ abs.(Cexact)
+    
+    pl4 = scatter(ts, re, ms=2, label="TRG")
+    vline!([Tc], line=:red, label=L"T_c")
+    title!("Specific heat relative error")
+    xlabel!("T")
+    ylabel!("ϵ")
+    display(pl4)
     
 end

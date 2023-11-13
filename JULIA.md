@@ -1,0 +1,1 @@
+- Copying a variable doesn't make a copy, it just add another way to access (and modify!) the same variable. Use the copy function instead
