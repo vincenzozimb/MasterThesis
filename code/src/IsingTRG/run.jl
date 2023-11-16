@@ -55,17 +55,17 @@ let
         cnt -= 1
     end
     println()
-    F = - ts .* logZ
-    Fh = -ts .* logZh
+    F = - ts .* logZ / 2^(topscale+1)
+    Fh = -ts .* logZh / 2^(topscale+1)
 
     # #filter by moving average
-    # window_size = 5
+    # window_size = 3
     # F = moving_average(F, window_size)
     # Fh = moving_average(Fh, window_size)
-    # F[1:2] .= NaN
-    # Fh[1:2] .= NaN
-    # F[end-1:end] .= NaN
-    # Fh[end-1:end] .= NaN
+    # F[1] = NaN
+    # Fh[1] = NaN
+    # F[end] = NaN
+    # Fh[end] = NaN
     
     pl1 = scatter(ts, F, ms=2, label="TRG")
     vline!([Tc], line=:red, label=L"T_c")   
@@ -116,18 +116,5 @@ let
     ylabel!("M")
     display(pl4)
 
-
-    # ## relative error in the specific heat
-    # Fexact = ising_free_energy.(1.0 ./ ts, J)
-    # Cexact = Fderivative(Fexact,ts)
-
-    # re = abs.(C - Cexact) ./ abs.(Cexact)
-    
-    # pl4 = scatter(ts, re, ms=2, label="TRG")
-    # vline!([Tc], line=:red, label=L"T_c")
-    # title!("Specific heat relative error")
-    # xlabel!("T")
-    # ylabel!("ϵ")
-    # display(pl4)
     
 end

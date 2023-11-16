@@ -72,7 +72,7 @@ let
     end
 
     Dcut = 10
-    n = 30
+    n = 12
 
     ts = 0.1:0.1:5;
     β = inv.(ts);
@@ -95,14 +95,14 @@ let
     Tc = 2.0 / (log(1.0+sqrt(2.0))) # Tc ≈ 2.2691853
 
 
-    pl1 = scatter(ts, F, ms=2, label="TRG")
-    vline!([Tc], line=:red, label=L"T_c")   
+    # pl1 = scatter(ts, F, ms=2, label="TRG")
+    # vline!([Tc], line=:red, label=L"T_c")   
     Fexact = ising_free_energy.(1.0 ./ ts, J)
-    plot!(ts, Fexact, label="Exact")
-    title!("Free energy per site")
-    xlabel!("T")
-    ylabel!("F")
-    display(pl1)
+    # plot!(ts, Fexact, label="Exact")
+    # title!("Free energy per site")
+    # xlabel!("T")
+    # ylabel!("F")
+    # display(pl1)
 
 
     ## relative error in free energy
@@ -110,23 +110,23 @@ let
     
     pl2 = scatter(ts, re, ms=2, label="TRG")
     vline!([Tc], line=:red, label=L"T_c")
-    title!("Free energy relative error")
+    title!("Free energy relative error D=$Dcut")
     xlabel!("T")
     ylabel!("ϵ")
     display(pl2)
 
-    ## specific heat
-    C = Fderivative(F,ts)
-    tp = 0.1:0.01:5.0
-    Fexact = ising_free_energy.(1.0 ./ tp, J)
-    Cexact = Fderivative(Fexact,tp)
+    # ## specific heat
+    # C = Fderivative(F,ts)
+    # tp = 0.1:0.01:5.0
+    # Fexact = ising_free_energy.(1.0 ./ tp, J)
+    # Cexact = Fderivative(Fexact,tp)
     
-    pl3 = scatter(ts[1:end-2], C, ms=2, label="TRG")
-    vline!([Tc], line=:red, label=L"T_c")
-    plot!(tp[1:end-2], Cexact, lw=:2, label="Exact")
-    title!("Specific heat")
-    xlabel!("T")
-    ylabel!("C")
-    display(pl3)
+    # pl3 = scatter(ts[1:end-2], C, ms=2, label="TRG")
+    # vline!([Tc], line=:red, label=L"T_c")
+    # plot!(tp[1:end-2], Cexact, lw=:2, label="Exact")
+    # title!("Specific heat")
+    # xlabel!("T")
+    # ylabel!("C")
+    # display(pl3)
 
 end
