@@ -1,6 +1,6 @@
 using ITensors
 using QuadGK
-using ForwardDiff
+# using ForwardDiff
 
 ## Square lattice Ising exact free energy 
 function ising_free_energy(β::Real, J::Real=1.0)
@@ -17,6 +17,7 @@ end
 
 ## Square lattice Ising exact magnetization
 function ising_magnetization(β::Real)
+    βc = log(1+sqrt(2))/2
     β > βc && return (1 - sinh(2 * β)^(-4))^(1 / 8)
     return 0.0
 end
@@ -63,6 +64,32 @@ function tensor_chess(J::Real, h::Real)
 end
 
 
+## function that calculates the elementary tensor with the W = M * M^t, without magnetic field for now
+function tensor_eig(J::Real)
+    
+    # The coupling constants are actually the adimensional ones. That is J is actually βJ
+    
+    ## indeces
+    dim0 = 2
+    i = Index(dim0,"scale=0")
+    l = addtags(i,"left");
+    d = addtags(i,"down");
+    r = addtags(i,"right");
+    u = addtags(i,"up");
+        
+    # define and initialize tensor
+    M = [sqrt(cosh(J)) sqrt(sinh(J)); sqrt(cosh(J)) -sqrt(sinh(J))]
+    M1 = ITensor(M,i,l)
+    M2 = ITensor(M,i,d)
+    M3 = ITensor(M,r,i)
+    M4 = ITensor(M,u,i)
+
+    A = M1 * M2 * M3 * M4
+
+    return A
+
+end
+
 ## function that calculates the log-partition function using TRG
 function trg(A::ITensor, maxdim::Int, topscale::Int)
         
@@ -74,8 +101,13 @@ function trg(A::ITensor, maxdim::Int, topscale::Int)
     @assert hastags(tags(inds(A)[3]), "right,scale=0")
     @assert hastags(tags(inds(A)[4]), "up,scale=0")
 
+    # retrieve indeces
+    l, d, r, u = filterinds(A)
+    @assert hassameinds((l,d,r,u), A)
+
     # TRG algorithm loop
     Z = 1.0
+    # n = []
     for scale in 1:topscale + 1
         # println("\n---------- Scale $scale -> $(1 + scale)  ----------")
         Fl, Fr = factorize(A, (d,r); maxdim=maxdim, tags="left,scale=$scale")
@@ -94,6 +126,7 @@ function trg(A::ITensor, maxdim::Int, topscale::Int)
         Fr *= delta(l,r)
         Fd *= delta(u,d)
         
+        # Aprov = copy(A)
         A = Fl * Fu * Fr * Fd
 
         l = l_new
@@ -105,6 +138,9 @@ function trg(A::ITensor, maxdim::Int, topscale::Int)
         trace = scalar(trace)
         A /= trace
         Z *= trace ^ (1.0 / (2.0^(1+scale)))
+        # if size(Aprov) == (maxdim, maxdim, maxdim, maxdim)
+        #     push!(n, norm(array(A) - array(Aprov)))
+        # end
     end
 
     return log(Z)
