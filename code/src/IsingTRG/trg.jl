@@ -107,7 +107,6 @@ function trg(A::ITensor, maxdim::Int, topscale::Int)
 
     # TRG algorithm loop
     Z = 1.0
-    # n = []
     for scale in 1:topscale + 1
         # println("\n---------- Scale $scale -> $(1 + scale)  ----------")
         Fl, Fr = factorize(A, (d,r); maxdim=maxdim, tags="left,scale=$scale")
@@ -126,7 +125,6 @@ function trg(A::ITensor, maxdim::Int, topscale::Int)
         Fr *= delta(l,r)
         Fd *= delta(u,d)
         
-        # Aprov = copy(A)
         A = Fl * Fu * Fr * Fd
 
         l = l_new
@@ -138,9 +136,6 @@ function trg(A::ITensor, maxdim::Int, topscale::Int)
         trace = scalar(trace)
         A /= trace
         Z *= trace ^ (1.0 / (2.0^(1+scale)))
-        # if size(Aprov) == (maxdim, maxdim, maxdim, maxdim)
-        #     push!(n, norm(array(A) - array(Aprov)))
-        # end
     end
 
     return log(Z)
