@@ -27,8 +27,8 @@ let
     end
 
     ## parameters
-    maxdim = 6 #max 15
-    topscale = 12
+    Dcut = 4 #max 15
+    Niter = 15
     
     Tc = 2.0 / (log(1.0+sqrt(2.0))) # Tc ≈ 2.2691853
 
@@ -42,21 +42,22 @@ let
     @show "=====TRG======"
     logZ = []
     logZh = []
+    tensors = []
     cnt = size(ks,1)
     for k in ks
         A = tensor_chess(k, 0.0)
-        y = trg(A, maxdim, topscale)
+        y = trg(A, Dcut, Niter)
         push!(logZ,y)
         A = tensor_chess(k, h)
-        y = trg(A, maxdim, topscale)
+        y = trg(A, Dcut, Niter)
         push!(logZh,y)
         print("\r count=$cnt")
         flush(stdout)
         cnt -= 1
     end
     println()
-    F = - ts .* logZ / 2^(topscale+1)
-    Fh = -ts .* logZh / 2^(topscale+1)
+    F = - ts .* logZ / 2^(Niter+1)
+    Fh = -ts .* logZh / 2^(Niter+1)
 
     # #filter by moving average
     # window_size = 3
@@ -67,25 +68,28 @@ let
     # F[end] = NaN
     # Fh[end] = NaN
     
+    # add images folder to path
+    images_path = pwd() * "/images"
+    
     pl1 = scatter(ts, F, ms=2, label="TRG")
     vline!([Tc], line=:red, label=L"T_c")   
     Fexact = ising_free_energy.(1.0 ./ ts, J)
     plot!(ts, Fexact, label="Exact")
-    title!("Free energy per site")
+    title!("Free energy per site D=$Dcut Niter=$Niter")
     xlabel!("T")
     ylabel!("F")
-    display(pl1)
-    
+    savefig(joinpath(images_path, "FD$Dcut"*"N$Niter.png"))
+
     ## relative error in free energy
     re = abs.(F - Fexact) ./ abs.(Fexact)
     # re = (Fexact - F) ./ Fexact
     
     pl2 = scatter(ts, re, ms=2, label="TRG")
     vline!([Tc], line=:red, label=L"T_c")
-    title!("Free energy relative error")
+    title!("Free energy relative error D=$Dcut Niter=$Niter")
     xlabel!("T")
     ylabel!("ϵ")
-    display(pl2)
+    savefig(joinpath(images_path, "ReD$Dcut"*"N$Niter.png"))
 
     ## specific heat
     C = Fderivative(F,ts)
@@ -96,10 +100,10 @@ let
     pl3 = scatter(ts[1:end-2], C, ms=2, label="TRG")
     vline!([Tc], line=:red, label=L"T_c")
     plot!(tp[1:end-2], Cexact, lw=:2, label="Exact")
-    title!("Specific heat")
+    title!("Specific heat D=$Dcut Niter=$Niter")
     xlabel!("T")
     ylabel!("C")
-    display(pl3)
+    savefig(joinpath(images_path, "CD$Dcut"*"N$Niter.png"))
 
 
     ## magnetization
@@ -111,10 +115,10 @@ let
     pl4 = scatter(ts, M, ms=2, label="TRG")
     vline!([Tc], line=:red, label=L"T_c")
     plot!(tp, Mexact, lw=:2, label="Exact")
-    title!("Magnetization")
+    title!("Magnetization D=$Dcut Niter=$Niter")
     xlabel!("T")
     ylabel!("M")
-    display(pl4)
+    savefig(joinpath(images_path, "MD$Dcut"*"N$Niter.png"))
+       
 
-    
 end

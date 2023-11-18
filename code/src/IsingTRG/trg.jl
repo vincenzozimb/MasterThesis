@@ -150,4 +150,56 @@ function trg(A::ITensor, Dcut::Int, Niter::Int)
 end
 
 
+##  TRG algorithm to check tensor convergence
+function trg_flow(A::ITensor, Dcut::Int, Niter::Int)
+
+    # check A tensor
+    @assert check_tensor(A)
+
+    # retrieve indeces
+    l, d, r, u = filterinds(A)
+    @assert hassameinds((l,d,r,u), A)
+
+    # TRG algorithm loop
+    #initial normalization
+    trace = A * delta(l,r) * delta(u,d)
+    trace = scalar(trace)
+    A /= trace
+    tnorm = [norm(A)]
+    for n in 1:Niter
+        # tensor decomposition
+        Fl, Fr = factorize(A, (d,r); maxdim=Dcut, tags="left,scale=$n")
+        Fu, Fd = factorize(A, (l,d); maxdim=Dcut, tags="up,scale=$n")
+        
+        l_new = commoninds(Fl,Fr)
+        r_new = replacetags(l_new, "left", "right")
+        Fr *= delta(l_new, r_new)
+        
+        u_new = commoninds(Fu,Fd)
+        d_new = replacetags(u_new, "up", "down")
+        Fd *= delta(u_new, d_new)
+        
+        Fl *= delta(r,l)
+        Fu *= delta(d,u)
+        Fr *= delta(l,r)
+        Fd *= delta(u,d)
+        
+        # calculate coarse grained tensor
+        A = Fl * Fu * Fr * Fd
+        
+        l = l_new
+        d = d_new
+        r = r_new
+        u = u_new
+
+        # normalize tensor and update
+        trace = A * delta(l,r) * delta(u,d)
+        trace = scalar(trace)
+        A /= trace
+        push!(tnorm, norm(A))
+    end
+    return tnorm
+end
+
+
 
