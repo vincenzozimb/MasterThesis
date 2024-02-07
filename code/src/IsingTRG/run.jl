@@ -27,7 +27,7 @@ let
     end
 
     ## parameters
-    Dcut = 4 #max 15
+    Dcut = 6 #max 15
     Niter = 15
     
     Tc = 2.0 / (log(1.0+sqrt(2.0))) # Tc ≈ 2.2691853
@@ -70,6 +70,9 @@ let
     
     # add images folder to path
     images_path = pwd() * "/images"
+    if !isdir(images_path)
+        mkdir(images_path)
+    end
     
     pl1 = scatter(ts, F, ms=2, label="TRG")
     vline!([Tc], line=:red, label=L"T_c")   
