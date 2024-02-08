@@ -2,6 +2,7 @@
 
 using Plots
 using JLD
+using Distributions
 
 include("func.jl")
 
@@ -43,24 +44,28 @@ let
     q = 4
     heff = (J*q*L0 .+ h) ./ ts
     pUp = exp.(heff) ./ (exp.(heff) .+ exp.(-heff))
+    
     # probDn = exp.(-heff) ./ (exp.(heff) .+ exp.(-heff))
     # @info probUp .+ probDn
-
     # @show ts[26] ts[27] ts[28]
-    @info "probabilities" pUp[26] pUp[27] pUp[28]
+    # @info "probabilities" pUp[26] pUp[27] pUp[28]
 
+
+    ## sample from the mean field distribution
+    # pUp = [0.2, 0.5, 0.9]
+    nsamples = 500000
+    samples = hcat([rand(Bernoulli(p),nsamples) for p in filter(!isnan, pUp)]...)
+    spins = (2 * samples) .-1 
     
-    nsamples = 20000
-    samples = [[rand(Bernoulli(p)) for _ in 1:nsamples] for p in filter(!isnan, pUp)]
-    # spins = 2 .* samples .- 1 
+    M = vec(sum(spins, dims=1) ./ nsamples)
+
+    @show size(ts) size(vec(M))
 
 
-    # samples = [rand(Bernoulli(pUp[60])) for _ in 1:nsamples]
+    f(x) = sqrt(4-x)
+    x = 3.5:0.1:4
+    y = f.(x)
 
-    # M = sum(spins) / nsamples
-    # @info M
-
-    # samples = [rand(Bernoulli(p)) for p in filter(!isnan, pUp)]
-    # nothing
+    MakePlot(filter(!isnan,ts), M, x, y, "Mean field", "sqrt", "Magnetization with mean field", "T", "M", "MFmagnetization.png")
 
 end
