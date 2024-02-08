@@ -92,11 +92,6 @@ function check_tensor(A::ITensor)
 end
 
 
-## TRG step
-function trg_step(A::ITensor, maxdim::Int)
-    nothing
-end
-
 ## Calculate the log-partition function using TRG
 function trg(A::ITensor, Dcut::Int, Niter::Int)
 
