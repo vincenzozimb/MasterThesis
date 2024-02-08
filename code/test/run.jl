@@ -1,7 +1,7 @@
 using Plots
 using LaTeXStrings
 
-include("trg.jl")
+# include("trg.jl")
 
 let   
 
