@@ -10,7 +10,7 @@ let
     ## Physical parameters
     
     # bond dimension (max 15 on my laptop)
-    Dcut = 6
+    Dcut = 12
     # number of iterations
     Niter = 15
     # coupling constant
@@ -47,34 +47,20 @@ let
     println()
     
     
-    ## Save results
-    # save("results.jld")
-
-
-    ## Calculate results
-    
     # free energies
     F = - ts .* logZ / 2^(Niter+1);
     Fh = -ts .* logZh / 2^(Niter+1);
-    Fexact = ising_free_energy.(1.0 ./ ts, J)
     
-    # relative error in free energy
-    re = abs.(F - Fexact) ./ abs.(Fexact) 
-
-    #  specific heat and magnetization
-    M = -(Fh - F) ./ (h * ts)
-    C = SpecificHeat(F,ts)
     
-    tp = 0.1:0.01:10.0
-    Fexactp = ising_free_energy.(1.0 ./ tp, J)
-    Cexact = SpecificHeat(Fexactp,tp)
-    Mexact = ising_magnetization.(1.0 ./ tp)
-
-
-    ## Plots
-    MakePlot(ts, F, ts, Fexact, "TRG", "Exact", "Free Energy per site", "T", "F", "FreeEnergy.png")
-    MakePlot(ts, re, NaN, NaN, "TRG", "", "Free energy relative error", "T", "ϵ", "RelativeError.png")
-    MakePlot(ts, C, tp, Cexact, "TRG", "Exact", "Specific heat", "T", "C", "SpecificHeat.png")
-    MakePlot(ts, M, tp, Mexact, "TRG", "Exact", "Magnetization", "T", "M", "Magnetization.png")
+    ## Save results
+    
+    # add image folder to path
+    data_path = pwd() * "/data"
+    if !isdir(data_path)
+        mkdir(data_path)
+    end
+    
+    # save free energies
+    save("data/results.jld", "J", J, "h", h, "ts", ts, "F", F, "Fh", Fh)
     
 end
