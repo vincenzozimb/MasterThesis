@@ -27,7 +27,7 @@ let
     tp = 0.1:0.01:10.0
     Fexactp = ising_free_energy.(1.0 ./ tp, J)
     Cexact = SpecificHeat(Fexactp,tp)
-    Mexact = ising_magnetization.(1.0 ./ tp)
+    Mexact = ising_magnetization.(1.0 ./ tp, J)
 
 
     ## Plots

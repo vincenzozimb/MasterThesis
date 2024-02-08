@@ -61,6 +61,6 @@ let
     end
     
     # save free energies
-    save("data/results.jld", "J", J, "h", h, "ts", ts, "F", F, "Fh", Fh)
+    save("data/results.jld", "J", J, "h", h, "ts", ts, "F", F, "Fh", Fh, "logZ", logZ)
     
 end

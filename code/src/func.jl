@@ -6,7 +6,7 @@ using LaTeXStrings
 
 
 ## global variables
-Tc = 2.0 / (log(1.0+sqrt(2.0))) # Tc ≈ 2.2691853
+Tc = 2.0 / (log(1.0+sqrt(2.0))) # Tc ≈ 2.2691853 / J (remember to multiply by the coupling constant)
 βc = 1 / Tc
 
 
@@ -50,9 +50,9 @@ end
 
 
 ## square lattice Ising exact magnetization
-function ising_magnetization(β::Real)
+function ising_magnetization(β::Real, J::Real=1.0)
     # βc = log(1+sqrt(2))/2
-    β > βc && return (1 - sinh(2 * β)^(-4))^(1 / 8)
+    β > βc && return (1 - sinh(2 * β*J)^(-4))^(1 / 8)
     return 0.0
 end
 
@@ -73,4 +73,24 @@ function MakePlot(x1, y1, x2, y2, lab1::String, lab2::String, title::String, xla
     xlabel!(xlab)
     ylabel!(ylab)
     savefig(joinpath(images_path, saveas))  
+end
+
+
+## Newton-Raphson method
+function NewtonRaphson(f::Function, x0::Number, fprime::Function, args::Tuple=(); 
+                tol::AbstractFloat=1e-8, maxiter::Integer=50, eps::AbstractFloat=1e-10)
+    for _ in 1:maxiter
+        yprime = fprime(x0, args...)
+        if abs(yprime) < eps
+            warn("First derivative is zero")
+            return x0
+        end
+        y = f(x0, args...)
+        x1 = x0 - y/yprime
+        if abs(x1-x0) < tol
+            return x1
+        end
+        x0 = x1
+    end
+    error("Max iteration exceeded")
 end
