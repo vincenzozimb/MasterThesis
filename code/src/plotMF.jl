@@ -25,8 +25,13 @@ let
     dmagn = vec(std(magn_sample, dims=1)) ./ Nspins # to check
 
     energy = vec(mean(energy_sample, dims=1))
-    energyVar = vec(var(energy_sample, dims=1)) 
-    specificheat = (energyVar ./ (ts[idx] .^2)) ./ Nspins
+    energy_sq = vec(mean(energy_sample .^2, dims=1))
+
+    specificheat = (energy_sq .- energy .^2) ./ (Nspins * ts[idx])
+
+    # energyVar = (nsamples-1) * vec(var(energy_sample, dims=1)) 
+    # specificheat = (energyVar ./ (ts[idx] .^2)) ./ Nspins
+    
     energy ./= Nspins
 
 
@@ -43,6 +48,6 @@ let
 
     MakePlot(ts[idx], magn, NaN, NaN, 4, "Mean field", "", "Magnetization with mean field", "T", "M", "MF/magnetization.png")
     MakePlot(ts[idx], energy, NaN, NaN, 4, "Mean field", "", "Energy per site with mean field", "T", "E", "MF/energy.png")
-    MakePlot(ts[idx], specificheat, x, y, 4, "Mean field", "", "Specific heat per site with mean field", "T", "C", "MF/specificheat.png")
+    MakePlot(ts[idx], specificheat, NaN, NaN, 4, "Mean field", "", "Specific heat per site with mean field", "T", "C", "MF/specificheat.png")
     
 end
