@@ -65,7 +65,7 @@ end
 
 
 ## plot function, with critical temperature
-function MakePlot(x1, y1, x2, y2, lab1::String, lab2::String, title::String, xlab::String, ylab::String, saveas::String)
+function MakePlot(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::String, xlab::String, ylab::String, saveas::String)
     scatter(x1, y1, ms=2, label=lab1)
     vline!([Tc], line=:red, label=L"T_c")   
     !isnan(x2[1]) ? plot!(x2, y2, label=lab2) : nothing

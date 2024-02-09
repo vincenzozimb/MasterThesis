@@ -10,9 +10,9 @@ let
     ## Physical parameters
     
     # bond dimension (max 15 on my laptop)
-    Dcut = 12
+    Dcut = 6
     # number of iterations
-    Niter = 15
+    Niter = 11 # 11 for 64 x 64 lattice (4096 spins)
     # coupling constant
     J = 1.0
     # external field
@@ -47,7 +47,7 @@ let
     println()
     
     
-    # free energies
+    # free energies per spin
     F = - ts .* logZ / 2^(Niter+1);
     Fh = -ts .* logZh / 2^(Niter+1);
     
@@ -60,7 +60,8 @@ let
         mkdir(data_path)
     end
     
-    # save free energies
-    save("data/results.jld", "J", J, "h", h, "ts", ts, "F", F, "Fh", Fh, "logZ", logZ)
+    # save parameters and results
+    save("data/param.jld", "Niter", Niter, "J", J, "h", h)
+    save("data/resultsTrg.jld", "ts", ts, "F", F, "Fh", Fh, "logZ", logZ)
     
 end

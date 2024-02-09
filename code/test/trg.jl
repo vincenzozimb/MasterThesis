@@ -2,7 +2,7 @@ using ITensors
 using QuadGK
 # using ForwardDiff
 
-## Square lattice Ising exact free energy 
+## Square lattice Ising exact free energy per spin
 function ising_free_energy(β::Real, J::Real=1.0)
     k = β * J
     c = cosh(2 * k)
