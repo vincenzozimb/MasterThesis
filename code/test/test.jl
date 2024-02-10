@@ -1,8 +1,15 @@
-using  Plots
+using Plots
 using Statistics
+
+# using StatsPlots
+
+include("../src/func.jl")
 
 let 
 
-    3 - 2^2
+    a = 4
+    sign(a)
+    
+    
 
 end

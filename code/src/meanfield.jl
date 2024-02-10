@@ -7,13 +7,13 @@ include("func.jl")
 
 
 ## function for self consistent equation 
-function mf(L::Real, β::Real; h::Real=0.0, J::Real=1.0, q::Int=4)
+function mf(L::Real, β::Real, J::Real=1.0, h::Real=0.0)
     return L - tanh(β * (h + q*J*L) )
 end
 
 
 ## derivative of the function for self consistent equation
-function mfder(L::Real, β::Real; h::Real=0.0, J::Real=1.0, q::Int=4)
+function mfder(L::Real, β::Real, J::Real=1.0, h::Real=0.0)
     return 1.0 - β*J*q / (cosh( β * (h + q*J*L) )^2)
 end
 
@@ -28,9 +28,9 @@ function sampleMF(Nspins::Integer, pUp)
 end
 
 
-## Ising energy function
+## Ising energy function (maybe to debug if h!=0)
 function IsingEnergy(spins::Array{Int, 3}; J::Float64=1.0, h::Float64=0.0)
-
+    
     Lx, Ly, nt = size(spins)
 
     energy_t = zeros(Float64, nt)
@@ -57,6 +57,18 @@ function IsingEnergy(spins::Array{Int, 3}; J::Float64=1.0, h::Float64=0.0)
 
 end
 
+function MFmagnetization(ts, J=1.0, h=0.0)
+    # (NaN at the critical point)
+    Tcmf = 4.0
+    x0 = 1.0
+    L0 = []
+    for t in ts
+        t != Tcmf ? y = NewtonRaphson(mf, x0, mfder, (1.0/t, J, h)) : y = NaN 
+        push!(L0,y)
+    end
+    return L0
+end
+
 
 let 
     
@@ -74,21 +86,13 @@ let
    
 
     ## temperature range
-    ts = 0.5:0.05:8
+    ts = 0.005:0.1:8.0
 
-    ## calculate zeros (NaN at the critical point)
-    x0 = 1.0
-    Tcmf = 4.0 # mean field critical temperature
-    
-    L0 = []
-    for t in ts
-        t != Tcmf ? y = NewtonRaphson(mf, x0, mfder, (1.0/t,)) : y = NaN 
-        push!(L0,y)
-    end
+    ## calculate magnetization solving the self consistent equation (NaN at the critical point)   
+    L0 = MFmagnetization(ts)
 
 
     ## calculate mean field distribution (probability is NaN at the critical point)
-    q = 4
     heff = (J*q*L0 .+ h) ./ ts
     pUp = exp.(heff) ./ (exp.(heff) .+ exp.(-heff))
     
@@ -96,28 +100,16 @@ let
     ## exclude critical temperature and take a simple sample
     idx = .!isnan.(pUp)
     pUp = pUp[idx]
-    spins = sampleMF(Nspins, pUp)
     
 
-    # # calculate and plot sample magnetization and energy
-    # images_path = pwd() * "/images/MF"
-    # if !isdir(images_path)
-    #     mkdir(images_path)
-    # end
-    # M = vec(sum(spins, dims=(1,2)) ./ Nspins)    
-    # MakePlot(ts[idx], M, NaN, NaN, 4, "Mean field", "", "Magnetization with mean field", "T", "M", "MFmagnetizationSample.png")
-    # energy = IsingEnergy(spins) ./ Nspins
-    # MakePlot(ts[idx], energy, NaN, NaN, 4, "Mean field", "", "Energy per spin with mean field", "T", "E", "MFenergySample.png")
-
-
     ## sample from the mean field distribution
-    nsamples = 1000
+    nsamples = 100
     magn_sample = zeros(Float64,nsamples, length(ts[idx]))
     energy_sample = zeros(Float64,nsamples, length(ts[idx]))
     for i in 1:nsamples
         configuration = sampleMF(Nspins,pUp)
         magn_sample[i, :] = vec(sum(configuration, dims=(1,2)))
-        energy_sample[i, :] = IsingEnergy(configuration)
+        energy_sample[i, :] = IsingEnergy(configuration,J=J,h=h)
     end
 
 
@@ -126,7 +118,7 @@ let
     if !isdir(data_path)
         mkdir(data_path)
     end
-
+    
 
     # save mean field sample
     save("data/MeanField.jld", "ts", ts, "idx", idx, "nsamples", nsamples, "magn_sample", magn_sample, "energy_sample", energy_sample)

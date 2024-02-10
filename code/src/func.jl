@@ -8,6 +8,7 @@ using LaTeXStrings
 ## global variables
 Tc = 2.0 / (log(1.0+sqrt(2.0))) # Tc ≈ 2.2691853 / J (remember to multiply by the coupling constant)
 βc = 1 / Tc
+q = 4 # coordination number
 
 
 ## specific heat capacity with finite differences
@@ -65,14 +66,27 @@ end
 
 
 ## plot function, with critical temperature
-function MakePlot(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::String, xlab::String, ylab::String, saveas::String)
+function MakePlot(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::String, xlab::String, ylab::String, saveas)
     scatter(x1, y1, ms=2, label=lab1)
     vline!([Tc], line=:red, label=L"T_c")   
-    !isnan(x2[1]) ? plot!(x2, y2, label=lab2) : nothing
+    # !isnan(x2[1]) ? plot!(x2, y2, label=lab2) : nothing
+    !isnan(x2[1]) ? scatter!(x2, y2, ms=2, label=lab2) : nothing
     title!(title)
     xlabel!(xlab)
     ylabel!(ylab)
-    savefig(joinpath(images_path, saveas))  
+    !ismissing(saveas) ? savefig(joinpath(images_path, saveas)) : display(plot!())
+end
+
+
+## plot with errorbar, with critical temperature
+function MakeErrorPlot(x, y, dy, Tc, lab::String, title::String, xlab::String, ylab::String, saveas)
+    scatter(x, y, ms=2, label=lab)
+    yerror!(x, y, yerr=dy, msc=:blue)
+    vline!([Tc], line=:red, label=L"T_c")
+    title!(title)
+    xlabel!(xlab)
+    ylabel!(ylab)
+    !ismissing(saveas) ? savefig(joinpath(images_path, saveas)) : display(plot!()) 
 end
 
 
