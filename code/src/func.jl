@@ -108,3 +108,59 @@ function NewtonRaphson(f::Function, x0::Number, fprime::Function, args::Tuple=()
     end
     error("Max iteration exceeded")
 end
+
+
+## function for self consistent equation in mean field
+function mf(L::Real, β::Real, J::Real=1.0, h::Real=0.0)
+    return L - tanh(β * (h + q*J*L) )
+end
+
+
+## derivative of the function for self consistent equation in mean field
+function mfder(L::Real, β::Real, J::Real=1.0, h::Real=0.0)
+    return 1.0 - β*J*q / (cosh( β * (h + q*J*L) )^2)
+end
+
+
+## sample configuration from the mean field distribution
+function sampleMF(Nspins::Integer, p::Real)
+    n = Int(sqrt(Nspins))
+    spins = rand(Bernoulli(p), Nspins)
+    spins = (2 * spins) .- 1
+    spins = reshape(spins, n, n) 
+    return spins
+end
+
+
+## Ising energy functions
+function IsingEnergy(spins::Array{Int, 2}; J::Float64=1.0, h::Float64=0.0)
+    Lx, Ly = size(spins)
+    energy = 0
+    for i in 1:Lx
+        for j in 1:Ly
+            s = spins[i, j]
+            nb_sum = spins[mod1(i+1, Lx), j] +
+                        spins[mod1(i-1, Lx), j] +
+                        spins[i, mod1(j+1, Ly)] +
+                        spins[i, mod1(j-1, Ly)]
+
+            energy += -J * s * nb_sum - h * s
+        end
+    end
+    energy /= 2  # divide by 2 to avoid double counting
+    return energy
+end
+
+
+## Mean Field magnetization
+function MFmagnetization(ts, J=1.0, h=0.0)
+    # (NaN at the MF critical point)
+    Tcmf = 4.0
+    x0 = 1.0
+    L0 = []
+    for t in ts
+        t != Tcmf ? y = NewtonRaphson(mf, x0, mfder, (1.0/t, J, h)) : y = NaN 
+        push!(L0,y)
+    end
+    return L0
+end

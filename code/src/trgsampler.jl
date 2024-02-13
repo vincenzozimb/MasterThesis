@@ -46,40 +46,65 @@ let
     
     ## Calculate MF magnetization solving the self consistent equation
     L0 = MFmagnetization(ts, J, h)
+
+
+    ## calculate mean field distribution (probability is NaN at the MF critical point)
+    beta = 1.0 ./ ts
+    heff = J*q*L0 .+ h
+    pUp = exp.(beta .* heff) ./ (exp.(beta .* heff) .+ exp.(-beta .* heff))
+    
+
+    ## exclude critical temperature and take a simple sample
+    idx = .!isnan.(pUp)
+    pUp = pUp[idx]
+    ts = ts[idx]
     
 
     ## Calculate the MF partition function
-    beta = 1.0 ./ ts
-    heff = (J*q*L0 .+ h) .* beta
-    pUp = exp.(heff) ./ (exp.(heff) .+ exp.(-heff))
-
-    logZm = -(0.5 * Nspins * q * J) * (L0.^2 ./ ts) .+ Nspins * (log.(cosh.(heff)) .+ log(2) )
+    logZm = -(0.5 * Nspins * q * J) * (L0.^2 ./ ts) .+ Nspins * (log.(cosh.(beta .* heff)) .+ log(2) )
     f1 = -(1 / Nspins) * logZm .* ts # feee energy mean field   
     f2 = -(1 / Nspins) * logZ .* ts # free energy trg
     # MakePlot(ts, f1, ts, f2, Tc, "TRG", "MF", "Free energies per unit spin", "T", "free energy per spin", missing)
     
     
-    ## Calculate constant for Accept-Reject algorithm
-    htot = h*beta .- heff
+    # Calculate constant for Accept-Reject algorithm
+    htot = h .- heff
     
-    C = 2*cosh.(heff)
-    A = 2 * J .* beta .+ htot
+    C = 2*cosh.(beta .* heff)
+    A = beta .* (2 * J .+ htot)
 
     logM = Nspins * (log.(C) .- (logZ ./ Nspins) .+ A)
-    
+    # logM = abs.(logM)
 
-    nsamples = 10
-    samples = AccRej(nsamples, Nspins, logM[10], pUp[10], logZ[10], beta[10], L0[10], J, h)
+    display(scatter(ts, logM))
 
-    # spin = sampleMF(Nspins, pUp)
-    # E = IsingEnergy(spin, J=J, h=h) ./ Nspins
-    # M = vec(mean(magn_sample, dims=1)) ./ Nspins
-    # dM = vec(std(magn_sample, dims=1)) ./ Nspins
-    # E = vec(mean(energy_sample, dims=1)) ./ Nspins
-    # VarE = vec(var(energy_sample, dims=1)) ./ Nspins^2
+    ## sampling
+    # nsamples = Int(ceil(exp(20)))
+    # nsamples = 100
+    # k = 30
 
-    # MakePlot(ts, E, NaN, NaN, Tc, "MF", "", "Energy", "T", "E", missing)
-    # MakeErrorPlot(ts, E, sqrt.(VarE), Tc, "MF", "Energy", "T", "E", missing)
+    # @info ts[k]
+
+    # samples = []
+    # cnt = 0
+
+    # while cnt < nsamples
+    #     spins = sampleMF(Nspins, pUp[k])
+    #     u = rand(1)[1]
+    #     logP = -beta[k] * IsingEnergy(spins, J=J, h=h) - logZ[k]
+    #     logPm = beta[k] * heff[k] * sum(spins) - Nspins * log.(C[k])
+        
+    #     log(u) < logP - logPm - logM[k] ? push!(samples,1) : push!(samples,0)
+
+        # if log(u) < logP - logPm - logM[k] 
+        #     push!(samples, spins)
+        #     cnt += 1
+        # end
+   
+    #     cnt += 1
+    # end
+
+    # sum(samples)
 
     
 end

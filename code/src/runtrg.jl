@@ -10,9 +10,9 @@ let
     ## Physical parameters
     
     # bond dimension (max 15 on my laptop)
-    Dcut = 6
+    Dcut = 8
     # number of iterations
-    Niter = 13 # 11 for 64 x 64 lattice (4096 spins), 13 for  128 x 128 (16384), 15 for 256 x 256 (65536)
+    Niter = 15 # 11 for 64 x 64 lattice (4096 spins), 13 for  128 x 128 (16384), 15 for 256 x 256 (65536)
     # coupling constant
     J = 1.0
     # external field
