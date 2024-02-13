@@ -2,6 +2,7 @@
 
 using JLD
 using Distributions
+# using Plots
 
 include("func.jl")
 
@@ -27,8 +28,16 @@ function sampleMF(Nspins::Integer, pUp)
     return spins
 end
 
+function sampleMF_T(Nspins::Integer, p::Real)
+    n = Int(sqrt(Nspins))
+    spins = rand(Bernoulli(p), Nspins)
+    spins = (2 * spins) .- 1
+    spins = reshape(spins, n, n) 
+    return spins
+end
 
-## Ising energy function (maybe to debug if h!=0)
+
+## Ising energy function
 function IsingEnergy(spins::Array{Int, 3}; J::Float64=1.0, h::Float64=0.0)
     
     Lx, Ly, nt = size(spins)
@@ -56,6 +65,32 @@ function IsingEnergy(spins::Array{Int, 3}; J::Float64=1.0, h::Float64=0.0)
     return energy_t
 
 end
+
+
+function IsingEnergy_T(spins::Array{Int, 2}; J::Float64=1.0, h::Float64=0.0)
+    
+    Lx, Ly = size(spins)
+
+    energy = 0
+
+    for i in 1:Lx
+        for j in 1:Ly
+            s = spins[i, j]
+            nb_sum = spins[mod1(i+1, Lx), j] +
+                        spins[mod1(i-1, Lx), j] +
+                        spins[i, mod1(j+1, Ly)] +
+                        spins[i, mod1(j-1, Ly)]
+
+            energy += -J * s * nb_sum - h * s
+        end
+    end
+
+    energy = energy / 2  # divide by 2 to avoid double counting
+
+    return energy
+
+end
+
 
 function MFmagnetization(ts, J=1.0, h=0.0)
     # (NaN at the critical point)
@@ -118,10 +153,19 @@ let
     if !isdir(data_path)
         mkdir(data_path)
     end
-    
+
 
     # save mean field sample
     save("data/MeanField.jld", "ts", ts, "idx", idx, "nsamples", nsamples, "magn_sample", magn_sample, "energy_sample", energy_sample)
+
     
+    # ## tests
+    # test_sample = zeros(Float64,nsamples, length(ts[idx]))
+    # for i in 1:nsamples
+    #     configuration = sampleMF(Nspins,pUp)
+    #     test_sample[i, :] = IsingEnergy(configuration,J=J,h=-5.0)
+    # end
+    # E = vec(mean(test_sample, dims=1)) ./ Nspins
+    # plot(ts[idx], E)
 
 end

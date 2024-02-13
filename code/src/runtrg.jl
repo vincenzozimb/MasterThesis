@@ -12,7 +12,7 @@ let
     # bond dimension (max 15 on my laptop)
     Dcut = 6
     # number of iterations
-    Niter = 13 # 11 for 64 x 64 lattice (4096 spins), 13 for  128 x 128 (16384)
+    Niter = 13 # 11 for 64 x 64 lattice (4096 spins), 13 for  128 x 128 (16384), 15 for 256 x 256 (65536)
     # coupling constant
     J = 1.0
     # external field
@@ -22,7 +22,7 @@ let
     ## Simulation parameters
 
     # temperature range
-    ts = 0.1:0.15:10.0
+    ts = 0.5:0.15:10.0
     # βJ range
     ks = J ./ ts
     

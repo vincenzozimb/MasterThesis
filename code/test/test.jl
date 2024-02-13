@@ -7,9 +7,7 @@ include("../src/func.jl")
 
 let 
 
-    a = 4
-    sign(a)
-    
-    
+    u = rand(10000)
+    histogram(u)    
 
 end
