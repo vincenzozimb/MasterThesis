@@ -3,6 +3,7 @@
 using QuadGK
 using Plots
 using LaTeXStrings
+using Distributions
 
 
 ## global variables
@@ -65,21 +66,38 @@ if !isdir(images_path)
 end
 
 
-## plot function, with critical temperature
-function MakePlot(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::String, xlab::String, ylab::String, saveas)
-    scatter(x1, y1, ms=2, label=lab1)
+## plot function, with critical 
+function MakePlotLog(x1, y1, Tc, lab1::String, title::String, xlab::String, ylab::String, images_path, saveas)
+    scatter(x1, y1, ms=2, label=lab1, yaxis=:log)
     vline!([Tc], line=:red, label=L"T_c")   
-    !isnan(x2[1]) ? plot!(x2, y2, label=lab2) : nothing
-    # !isnan(x2[1]) ? scatter!(x2, y2, ms=2, label=lab2) : nothing
     title!(title)
     xlabel!(xlab)
     ylabel!(ylab)
     !ismissing(saveas) ? savefig(joinpath(images_path, saveas)) : display(plot!())
 end
 
+function Make2Plot(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::String, xlab::String, ylab::String, images_path, saveas)
+    scatter(x1, y1, ms=2, label=lab1)
+    vline!([Tc], line=:red, label=L"T_c")   
+    !isnan(x2[1]) ? plot!(x2, y2, label=lab2) : nothing
+    title!(title)
+    xlabel!(xlab)
+    ylabel!(ylab)
+    !ismissing(saveas) ? savefig(joinpath(images_path, saveas)) : display(plot!())
+end
+
+function MakePlotScatt(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::String, xlab::String, ylab::String, images_path, saveas)
+    scatter(x1, y1, ms=2, label=lab1)
+    vline!([Tc], line=:red, label=L"T_c")   
+    !isnan(x2[1]) ? scatter!(x2, y2, ms=2, label=lab2) : nothing
+    title!(title)
+    xlabel!(xlab)
+    ylabel!(ylab)
+    !ismissing(saveas) ? savefig(joinpath(images_path, saveas)) : display(plot!())
+end
 
 ## plot with errorbar, with critical temperature
-function MakeErrorPlot(x, y, dy, Tc, lab::String, title::String, xlab::String, ylab::String, saveas)
+function MakeErrorPlot(x, y, dy, Tc, lab::String, title::String, xlab::String, ylab::String, images_path, saveas)
     scatter(x, y, ms=2, label=lab)
     yerror!(x, y, yerr=dy, msc=:blue)
     vline!([Tc], line=:red, label=L"T_c")
@@ -144,7 +162,7 @@ function IsingEnergy(spins::Array{Int, 2}; J::Float64=1.0, h::Float64=0.0)
                         spins[i, mod1(j+1, Ly)] +
                         spins[i, mod1(j-1, Ly)]
 
-            energy += -J * s * nb_sum - h * s
+            energy += -J * s * nb_sum - 2 * h * s
         end
     end
     energy /= 2  # divide by 2 to avoid double counting

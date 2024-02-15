@@ -62,6 +62,6 @@ let
     
     # save parameters and results
     save("data/param.jld", "Niter", Niter, "J", J, "h", h)
-    save("data/resultsTrg.jld", "ts", ts, "F", F, "Fh", Fh, "logZ", logZ)
+    save("data/resultsTrg.jld", "ts", ts, "F", F, "Fh", Fh, "logZ", logZ, "logZh", logZh)
     
 end

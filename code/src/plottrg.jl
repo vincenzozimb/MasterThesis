@@ -34,14 +34,14 @@ let
     ## Plots
 
     # create trg images subfolder
-    images_path = pwd() * "/images/trg"
+    images_path = pwd() * "/images/trg/"
     if !isdir(images_path)
         mkdir(images_path)
     end
 
-    MakePlot(ts, F, ts, Fexact, Tc, "TRG", "Exact", "Free Energy per site", "T", "F", "trg/FreeEnergy.png")
-    MakePlot(ts, re, NaN, NaN, Tc, "TRG", "", "Free energy relative error", "T", "ϵ", "trg/RelativeError.png")
-    MakePlot(ts, C, tp, Cexact, Tc, "TRG", "Exact", "Specific heat per site", "T", "C", "trg/SpecificHeat.png")
-    MakePlot(ts, M, tp, Mexact, Tc, "TRG", "Exact", "Magnetization", "T", "M", "trg/Magnetization.png")
+    Make2Plot(ts, F, ts, Fexact, Tc, "TRG", "Exact", "Free Energy per site", "T", "F", images_path, "FreeEnergy.png")
+    Make2Plot(ts, re, NaN, NaN, Tc, "TRG", "", "Free energy relative error", "T", "ϵ", images_path, "RelativeError.png")
+    Make2Plot(ts, C, tp, Cexact, Tc, "TRG", "Exact", "Specific heat per site", "T", "C", images_path, "SpecificHeat.png")
+    Make2Plot(ts, M, tp, Mexact, Tc, "TRG", "Exact", "Magnetization", "T", "M", images_path, "Magnetization.png")
     
 end
