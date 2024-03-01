@@ -23,6 +23,7 @@ let
     
     ts = get(res, "ts", NaN)
     logZ = get(res, "logZ", NaN)
+    logZh = get(res, "logZh", NaN)
     
     
     ## Calculate MF magnetization solving the self consistent equation
@@ -63,20 +64,20 @@ let
     
     
     # mean field vs TRG free energy
-    Make2Plot(ts, f1, ts, f2, Tc, "TRG", "MF", "Free energies per unit spin", "T", "free energy per spin", images_path, "TRGvsMF.png")
+    Make2Plot(ts, f1, ts, f2, Tc, "TRG", "MF", "Free energies per unit spin", L"T", L"F/N", images_path, "TRGvsMF.png")
     
 
     # log-acceptance probability
-    plt = scatter(ts, logM, ms=2, label=missing)
+    plt = scatter(ts, logM, ms=2, label=missing, yaxis=:log)
     vline!([Tc], line=:red, label=L"T_c")
     vline!([4], line=:green, label=L"T_c^{MF}")
     title!("Log-Acceptance Rate Gibbs vs MF")
     xlabel!(L"T")
     ylabel!(L"\log (M)")
-    savefig(joinpath(images_path, "AcceptanceRate.png"))
+    savefig(joinpath(images_path, "LogAcceptanceRate.png"))
     
 
-    ## KL divergence from Mean Field
+    ## KL divergence of Gibbs from Mean Field
 
     # sample from mean field
     nsamples = 10
@@ -101,10 +102,23 @@ let
     Dm = -beta .* (J * Aver1 .+ htot .* Aver2) .- (Nspins * log.(C)) .+ logZ
     dDm = beta .* sqrt.((J^2 * dAver1.^2) .+ (htot.^2 .* dAver2.^2))
     
-    # MakeErrorPlot(ts, Dm, 1*dDm, Tc, "KL div", "KL divergence from MF", "T", "D_{KL}", missing, missing)
-    Make2Plot(ts, Dm, NaN, NaN, [Tc, 4], "KL div", "", "KL divergence from MF", "T", "D_{KL}", images_path, "KLm.png")
-    MakePlotLog(ts, Dm, [Tc, 4], "KL div", "KL divergence from MF", "T", "D_{KL}", images_path, "KLmLog.png")
+    # MakeErrorPlot(ts, Dm, 100*dDm, Tc, "KL div", "KL divergence from MF", "T", "D_{KL}", missing, missing)
+    Make2Plot(ts, Dm, NaN, NaN, [Tc, 4], "KL div", "", "KL divergence from MF", L"T", L"D_{KL}", images_path, "KLm.png")
+    MakePlotLog(ts, Dm, [Tc, 4], "", "KL divergence from MF", L"T", L"D_{KL}", images_path, "KLmLog.png")
 
+
+    ## KL divergence of Mean Field from Gibbs
+
+    M = (logZh .- logZ) ./ (h * beta)
+    Aver = diff(logZ) ./ diff(beta)
+    Aver ./= J
+    push!(Aver, NaN)
+
+    Dm = -beta .* (-J * Aver .- htot .* M) .+ (Nspins * log.(C)) .- logZ
+
+    scatter(ts, Dm)
+    Make2Plot(ts, Dm, NaN, NaN, [Tc, 4], "KL div", "", "KL divergence from Gibbs", L"T", L"D_{KL}", images_path, "KL.png")
+    MakePlotLog(ts, Dm, [Tc, 4], "KL div", "KL divergence from Gibbs", L"T", L"D_{KL}", images_path, "KLlog.png")
 
     # prova = []
     # for k in 1:length(ts)

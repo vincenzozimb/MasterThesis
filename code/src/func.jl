@@ -65,20 +65,24 @@ if !isdir(images_path)
     mkdir(images_path)
 end
 
+Acc_string = Union{String, LaTeXString}
 
 ## plot function, with critical 
-function MakePlotLog(x1, y1, Tc, lab1::String, title::String, xlab::String, ylab::String, images_path, saveas)
+function MakePlotLog(x1, y1, Tc, lab1::Acc_string, title::Acc_string, xlab::Acc_string, ylab::Acc_string, images_path, saveas)
     scatter(x1, y1, ms=2, label=lab1, yaxis=:log)
-    vline!([Tc], line=:red, label=L"T_c")   
+    vline!([Tc[1]], line=:red, label=L"T_c")
+    length(Tc) == 2 ? vline!([Tc[2]], line=:green, label=L"T_c^{MF}") : nothing   
     title!(title)
     xlabel!(xlab)
     ylabel!(ylab)
     !ismissing(saveas) ? savefig(joinpath(images_path, saveas)) : display(plot!())
 end
 
-function Make2Plot(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::String, xlab::String, ylab::String, images_path, saveas)
+function Make2Plot(x1, y1, x2, y2, Tc, lab1::Acc_string, lab2::Acc_string, title::Acc_string, xlab::Acc_string, ylab::Acc_string, images_path, saveas)
     scatter(x1, y1, ms=2, label=lab1)
-    vline!([Tc], line=:red, label=L"T_c")   
+    vline!([Tc[1]], line=:red, label=L"T_c")
+    length(Tc) == 2 ? vline!([Tc[2]], line=:green, label=L"T_c^{MF}") : nothing
+    length(Tc) == 3 ? hline!([Tc[3]], line=:green, label=L"\log(2)") : nothing
     !isnan(x2[1]) ? plot!(x2, y2, label=lab2) : nothing
     title!(title)
     xlabel!(xlab)
@@ -86,9 +90,10 @@ function Make2Plot(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::String
     !ismissing(saveas) ? savefig(joinpath(images_path, saveas)) : display(plot!())
 end
 
-function MakePlotScatt(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::String, xlab::String, ylab::String, images_path, saveas)
+function MakePlotScatt(x1, y1, x2, y2, Tc, lab1::Acc_string, lab2::Acc_string, title::Acc_string, xlab::Acc_string, ylab::Acc_string, images_path, saveas)
     scatter(x1, y1, ms=2, label=lab1)
-    vline!([Tc], line=:red, label=L"T_c")   
+    vline!([Tc[1]], line=:red, label=L"T_c")
+    length(Tc) == 2 ? vline!([Tc[2]], line=:green, label=L"T_c^{MF}") : nothing   
     !isnan(x2[1]) ? scatter!(x2, y2, ms=2, label=lab2) : nothing
     title!(title)
     xlabel!(xlab)
@@ -97,10 +102,11 @@ function MakePlotScatt(x1, y1, x2, y2, Tc, lab1::String, lab2::String, title::St
 end
 
 ## plot with errorbar, with critical temperature
-function MakeErrorPlot(x, y, dy, Tc, lab::String, title::String, xlab::String, ylab::String, images_path, saveas)
+function MakeErrorPlot(x, y, dy, Tc, lab::Acc_string, title::Acc_string, xlab::Acc_string, ylab::Acc_string, images_path, saveas)
     scatter(x, y, ms=2, label=lab)
     yerror!(x, y, yerr=dy, msc=:blue)
-    vline!([Tc], line=:red, label=L"T_c")
+    vline!([Tc[1]], line=:red, label=L"T_c")
+    length(Tc) == 2 ? vline!([Tc[2]], line=:green, label=L"T_c^{MF}") : nothing
     title!(title)
     xlabel!(xlab)
     ylabel!(ylab)

@@ -6,8 +6,7 @@ include("func.jl")
 
 
 ## elementary tensor in the chessboard representation
-function tensor_chess(J::Real, h::Real)
-    # The coupling constants are actually the adimensional ones. That is J is actually βJ and h is actually βh
+function tensor_chess(beta::Real, J::Real, h::Real)
     dim0 = 2
     s = Index(dim0,"scale=0")
     # indeces
@@ -25,7 +24,7 @@ function tensor_chess(J::Real, h::Real)
                 for su in 1:dim0
                     Eint = Sig(sl)*Sig(sd) + Sig(sd)*Sig(sr) + Sig(sr)*Sig(su) + Sig(su)*Sig(sl)
                     Emag = (Sig(sl) + Sig(sd) + Sig(sr) + Sig(su)) / 2.0
-                    P = exp(J*Eint + h*Emag)
+                    P = exp(beta*J*Eint + beta*h*Emag)
                     A[l => sl, d => sd, r => sr, u => su] = P
                 end
             end
@@ -87,7 +86,7 @@ function trg(A::ITensor, Dcut::Int, Niter::Int)
     trace = A * delta(l,r) * delta(u,d)
     trace = scalar(trace)
     A /= trace
-    lnZ += log(trace) * 2^Niter
+    lnZ += log(trace) * 2^(Niter)
     for n in 1:Niter
         # tensor decomposition
         Fl, Fr = factorize(A, (d,r); maxdim=Dcut, tags="left,scale=$n")

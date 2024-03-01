@@ -10,7 +10,7 @@ let
     ## Physical parameters
     
     # bond dimension (max 15 on my laptop)
-    Dcut = 8
+    Dcut = 6
     # number of iterations
     Niter = 15 # 11 for 64 x 64 lattice (4096 spins), 13 for  128 x 128 (16384), 15 for 256 x 256 (65536)
     # coupling constant
@@ -24,7 +24,7 @@ let
     # temperature range
     ts = 0.5:0.15:10.0
     # βJ range
-    ks = J ./ ts
+    bs = 1.0 ./ ts
     
 
     ## TRG run
@@ -32,12 +32,12 @@ let
     @show welcome
     logZ = []
     logZh = []
-    cnt = size(ks,1)
-    for k in ks
-        A = tensor_chess(k, 0.0)
+    cnt = size(bs,1)
+    for b in bs
+        A = tensor_chess(b, J, 0.0)
         y = trg(A, Dcut, Niter)
         push!(logZ,y)
-        A = tensor_chess(k, h)
+        A = tensor_chess(b, J, h)
         y = trg(A, Dcut, Niter)
         push!(logZh,y)
         print("\r count=$cnt")

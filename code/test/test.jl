@@ -8,9 +8,8 @@ include("../src/func.jl")
 
 let 
 
-    v = [2,2,2,2,2,2]
-    std(v)
-    
+    v = 2
+    v[1]    
 
 
     # A1 = [1 1; -1 -1]
